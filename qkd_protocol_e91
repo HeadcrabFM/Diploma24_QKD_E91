@@ -1,0 +1,34 @@
+// QKD Protocol E91
+digraph {
+	A [label=Start]
+	B [label="Generate entangled pairs"]
+	C [label="Check interception (10% chance)"]
+	D [label="Check noise (0.1% chance)"]
+	E [label="Randomly choose basis for Alice and Bob"]
+	F [label="Measure photons"]
+	G [label="If bases match"]
+	H [label="Record results"]
+	I [label="Check Bell inequality"]
+	J [label="Record results in DataFrame"]
+	K [label="Generate secret key"]
+	L [label="If secret key >= 256 bits"]
+	M [label="Convert to HEX"]
+	N [label="Save results to Excel"]
+	O [label=End]
+	A -> B
+	B -> C
+	C -> D
+	D -> E
+	E -> F
+	F -> G
+	G -> H
+	H -> I
+	I -> J
+	J -> K
+	K -> L
+	L -> M
+	M -> N
+	N -> O
+	F -> G [constraint=false]
+	F -> I [constraint=false]
+}
