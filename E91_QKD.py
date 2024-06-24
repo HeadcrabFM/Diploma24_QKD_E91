@@ -3,6 +3,8 @@ import pandas as pd
 import random
 from qutip import basis, bell_state
 import hashlib
+import launcher as L
+
 
 # Функция для генерации запутанных пар: библиотека qutip
 def generate_entangled_pairs(num_pairs):
@@ -201,13 +203,21 @@ def record_results(df, idx, pair, interception_flag, noise_flag, alice_basis, bo
     df.at[idx, "Anticorrelation"] = int(alice_value != bob_value)
     df.at[idx, "Bell result"] = s_value
 
-if __name__ == "__main__":
+def Diploma_singletesting():
     a = 1
     while (1):
         print(f'\n>> DEBUG: dynamic interception 10%, static noise 1%\nТЕСТ {a}\n' + '- ' * 13)
         n = int(input('Введите количество запутанных пар для передачи:\t'))
-        main(n,0.15,1,0.1,0.01,0,0)
+        main(n, 0.15, 1, 0.1, 0.01, 0, 0)
         a += 1
         e = int(input('- ' * 55 + '\n> > enter 1 to continue, 0 to exit . . . -->\t'))
-        if e==0:
-            exit()
+        if e == 0:
+            if __name__ == "__main__":
+                exit()
+            else:
+                L.Diploma_launcher(a)
+
+if __name__ == "__main__":
+    L.Header(1)
+    print("E91 single test in progress...")
+    Diploma_singletesting()
