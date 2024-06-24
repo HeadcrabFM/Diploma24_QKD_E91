@@ -79,7 +79,7 @@ def generate_trash_key(df):
     bob_trash_key = ''.join(map(str, matched_bases_df["Bob value"].values))
     return alice_trash_key, bob_trash_key
 
-def binary_to_hex(binary_string):
+def binary_to_MD5(binary_string):
     if len(binary_string) < 256:
         print("\n * * * Длина итогового ключа должна быть >= 256 бит, хэширование отменено . . .")
         return "[insufficient length ! ]"
@@ -144,6 +144,8 @@ def console_display(alice_key,pure_key,pairs_not_entangled,pairs_not_entangled_p
             print(
                 f"QUBER > 15%: {round((quber) * 100, 2)}%, присутствие криптоаналитика!\n"
                 f"\n! ! ! ВНИМАНИЕ! РЕИНИЦИАЛИЗИРУЙТЕ ПРОТОКОЛ! ! !\n")
+    print('- ' * 55)
+
 
 # Основная функция
 def main(num_pairs, inter_prob, int_dp, int_dp_range, n_prob, n_dp, n_dp_range):
@@ -162,7 +164,7 @@ def main(num_pairs, inter_prob, int_dp, int_dp_range, n_prob, n_dp, n_dp_range):
         pairs_not_entangled = key_length - pure_length
         pairs_not_entangled_pct = 100 - round((pure_length / key_length) * 100, 2)
         quber = count_bell_violation / num_pairs
-        md5_hashed_key = binary_to_hex(alice_key)
+        md5_hashed_key = binary_to_MD5(alice_key)
     else:
         key_length = 0
         pure_length = 0
@@ -171,6 +173,9 @@ def main(num_pairs, inter_prob, int_dp, int_dp_range, n_prob, n_dp, n_dp_range):
         quber = 0
         md5_hashed_key = "[insufficient length ! ]"
 
+    if __name__ == "__main__":
+        # Сохранение результатов прямого вызова скрипта в Excel
+        results_df.to_excel("E91_singlescript_result.xlsx", index=False)
     # вывод в консоль:
     console_display(alice_key,pure_key,pairs_not_entangled,pairs_not_entangled_pct,quber, md5_hashed_key)
 
@@ -199,7 +204,10 @@ def record_results(df, idx, pair, interception_flag, noise_flag, alice_basis, bo
 if __name__ == "__main__":
     a = 1
     while (1):
-        print(f'\n>> DEBUG:\tТЕСТ {a}\n' + '- ' * 13)
+        print(f'\n>> DEBUG: dynamic interception 10%, static noise 1%\nТЕСТ {a}\n' + '- ' * 13)
         n = int(input('Введите количество запутанных пар для передачи:\t'))
         main(n,0.15,1,0.1,0.01,0,0)
         a += 1
+        e = int(input('- ' * 55 + '\n> > enter 1 to continue, 0 to exit . . . -->\t'))
+        if e==0:
+            exit()
