@@ -36,7 +36,7 @@ def Diploma_launcher(a):
     print('-' * 77)
     while (menu!=(1|2|3)):
         if menu==1:
-            QKD.Diploma_singletesting()
+            QKD.Diploma_singletesting('test')
         elif menu==2:
             test.Diploma_TestDisplay()
         else: menu=int(input('ВЫБЕРИТЕ ПУНКТ МЕНЮ 1-3!\n'

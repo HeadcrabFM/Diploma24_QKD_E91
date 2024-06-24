@@ -1,7 +1,7 @@
 import E91_QKD as QKD
 import launcher as L
 import pandas as pd
-
+import probabilities as pb
 
 def create_excel_file(filename):
     columns = ["Test #", "Количество ЭПР пар", "Длина итогового ключа", "Длина pure ключа", "Пар в ИК не запутано",
@@ -32,37 +32,37 @@ def create_combined_excel(filename, testtype):
     # filename = 'Combined_Test_Results.xlsx'
     if testtype == 'params':
         columns = ["тест №",
-                   "QUBER-ideal", "QUBER-static", "QUBER-dynamic",
-                   "len(ИК)-ideal", "len(ИК)-static", "len(ИК)-dynamic",
-                   "len(pure ИК)-ideal", "len(pure ИК)-static", "len(pure ИК)-dynamic",
-                   "Untngld ИК bits-ideal", "Untngld ИК bits-static", "Untngld ИК bits-dynamic"]
+                   "QUBER-uni", "QUBER-normal", "QUBER-geo",
+                   "len(ИК)-uni", "len(ИК)-normal", "len(ИК)-geo",
+                   "len(pure ИК)-uni", "len(pure ИК)-normal", "len(pure ИК)-geo",
+                   "Untngld ИК bits-uni", "Untngld ИК bits-normal", "Untngld ИК bits-geo"]
     elif testtype == 'length':
         columns = ["тест №",
                    "Количество ЭПР пар",
-                   "len(ИК)-ideal", "len(ИК)-static", "len(ИК)-dynamic",
-                   "len(pure ИК)-ideal", "len(pure ИК)-static", "len(pure ИК)-dynamic",
-                   "Untngld ИК bits-ideal", "Untngld ИК bits-static", "Untngld ИК bits-dynamic"]
+                   "len(ИК)-uni", "len(ИК)-normal", "len(ИК)-geo",
+                   "len(pure ИК)-uni", "len(pure ИК)-normal", "len(pure ИК)-geo",
+                   "Untngld ИК bits-uni", "Untngld ИК bits-normal", "Untngld ИК bits-geo"]
     combined_df = pd.DataFrame(columns=columns)
 
-    ideal_df = pd.read_excel(f'Test_{testtype}_ideal_results.xlsx')
-    static_df = pd.read_excel(f'Test_{testtype}_static_results.xlsx')
-    dynamic_df = pd.read_excel(f'Test_{testtype}_dynamic_results.xlsx')
+    ideal_df = pd.read_excel(f'Равномерное_Test_{testtype}_results.xlsx')
+    static_df = pd.read_excel(f'Нормальное_Test_{testtype}_results.xlsx')
+    dynamic_df = pd.read_excel(f'Геометрическое_Test_{testtype}_results.xlsx')
 
     combined_df["тест №"] = range(len(ideal_df))
     if testtype == 'params':
         metrics = [
-            ("QUBER", "QUBER-ideal", "QUBER-static", "QUBER-dynamic"),
-            ("Длина итогового ключа", "len(ИК)-ideal", "len(ИК)-static", "len(ИК)-dynamic"),
-            ("Длина pure ключа", "len(pure ИК)-ideal", "len(pure ИК)-static", "len(pure ИК)-dynamic"),
-            ("Пар в ИК не запутано", "Untngld ИК bits-ideal", "Untngld ИК bits-static", "Untngld ИК bits-dynamic")
+            ("QUBER", "QUBER-uni", "QUBER-normal", "QUBER-geo"),
+            ("Длина итогового ключа", "len(ИК)-uni", "len(ИК)-normal", "len(ИК)-geo"),
+            ("Длина pure ключа", "len(pure ИК)-uni", "len(pure ИК)-normal", "len(pure ИК)-geo"),
+            ("Пар в ИК не запутано", "Untngld ИК bits-uni", "Untngld ИК bits-normal", "Untngld ИК bits-geo")
         ]
     if testtype == 'length':
         combined_df["Количество ЭПР пар"] = ideal_df["Количество ЭПР пар"]
         metrics = [
-            ("Длина итогового ключа", "len(ИК)-ideal", "len(ИК)-static", "len(ИК)-dynamic"),
-            ("Длина pure ключа", "len(pure ИК)-ideal", "len(pure ИК)-static", "len(pure ИК)-dynamic"),
-            ("Пар в ИК не запутано", "Untngld ИК bits-ideal", "Untngld ИК bits-static", "Untngld ИК bits-dynamic"),
-            ("QUBER", "QUBER-ideal", "QUBER-static", "QUBER-dynamic")
+            ("Длина итогового ключа", "len(ИК)-uni", "len(ИК)-normal", "len(ИК)-geo"),
+            ("Длина pure ключа", "len(pure ИК)-uni", "len(pure ИК)-normal", "len(pure ИК)-geo"),
+            ("Пар в ИК не запутано", "Untngld ИК bits-uni", "Untngld ИК bits-normal", "Untngld ИК bits-geo"),
+            ("QUBER", "QUBER-uni", "QUBER-normal", "QUBER-geo")
         ]
 
     for original_col, ideal_col, static_col, dynamic_col in metrics:
@@ -73,18 +73,30 @@ def create_combined_excel(filename, testtype):
     combined_df.to_excel(filename, index=False)
 
 
-def test_E91(testtype, n, testname, filename, num_pairs, inter_prob, int_dp, int_dp_range, n_prob, n_dp, n_dp_range):
-    create_excel_file(filename)
-    for i in range(n):
-        print(f'\nТЕСТ {testtype}\t#{i + 1}\n{testname} \n' + '- ' * 13)
-
-        key_length, pure_length, pairs_not_entangled, pairs_not_entangled_pct, quber, md5_hashed_key = QKD.main(
-            num_pairs, inter_prob, int_dp, int_dp_range, n_prob, n_dp, n_dp_range)
+def test_E91(testtype, n, testname, filename1, num_pairs, int_dp, int_dp_range, n_prob, n_dp, n_dp_range):
+    models = ['Равномерное', 'Нормальное', 'Геометрическое']
+    colors=['grey','cyan','pink']
+    for i in range (len(models)):
+        filename=filename1
+        filename=models[i]+'_'+filename
+        create_excel_file(filename)
+        if __name__ == "__main__":
+            inter_prob_line = pb.Prob_distribution(num_pairs, models[i], colors[i], 'yes')
+        else:
+            inter_prob_line = pb.Prob_distribution(num_pairs, models[i], colors[i], 'no')
         if testtype == 'length':
-            num_pairs += 10;
+            num_pairs = 20
+        for j in range(n):
+            print(f'\nТЕСТ {testtype}\t#{j + 1}\n{testname} \n' + '- ' * 13)
 
-        append_to_excel(filename, i, num_pairs, key_length, pure_length, pairs_not_entangled,
-                        pairs_not_entangled_pct, quber, md5_hashed_key)
+            key_length, pure_length, pairs_not_entangled, pairs_not_entangled_pct, quber, md5_hashed_key = QKD.main(
+                num_pairs, inter_prob_line, int_dp, int_dp_range, n_prob, n_dp, n_dp_range,models[i])
+
+            if testtype == 'length':
+                num_pairs += 10;
+
+            append_to_excel(filename, j, num_pairs, key_length, pure_length, pairs_not_entangled,
+                            pairs_not_entangled_pct, quber, md5_hashed_key)
 
 
 def TestSession(testtype):
@@ -95,14 +107,9 @@ def TestSession(testtype):
     elif testtype == 'params':
         num_pairs = 1000
 
-    test_E91(testtype, n, 'В ИДЕАЛЬНЫХ УСЛОВИЯХ - БЕЗ ПЕРЕХВАТА, ВЕР. ШУМА = 5%',
-             f'Test_{testtype}_ideal_results.xlsx', num_pairs, 0,
+    test_E91(testtype, n, f'В ИДЕАЛЬНЫХ УСЛОВИЯХ - БЕЗ ПЕРЕХВАТА, ВЕР. ШУМА = 5%',
+             f'Test_{testtype}_results.xlsx', num_pairs,
              0, 0, 0.05, 0, 0)
-    test_E91(testtype, n, 'CО СТАТИЧЕСКОЙ ВЕРОЯТНОСТЬЮ ПЕРЕХВАТА =10% И  ШУМА =5%',
-             f'Test_{testtype}_static_results.xlsx', num_pairs,
-             0.1, 0, 0, 0.05, 0, 0)
-    test_E91(testtype, n, 'C ДИНАМИЧЕСКОЙ ВЕРОЯТНОСТЬЮ ПЕРЕХВАТА =10(+5)% И ШУМА =5(+2.5)%',
-             f'Test_{testtype}_dynamic_results.xlsx', num_pairs, 0.1, 1, 0.05, 0.05, 1, 0.025)
     create_combined_excel(f'Combined_Test_Results_{testtype}_{n}reps.xlsx', testtype)
 
 
