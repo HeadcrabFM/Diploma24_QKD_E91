@@ -1,4 +1,4 @@
-import E91_QKD
+import E91_QKD as QKD
 import pandas as pd
 
 
@@ -75,7 +75,7 @@ def create_combined_excel(filename,testtype):
 def test_E91(testtype, n, testname, filename, num_pairs, inter_prob, int_dp, int_dp_range, n_prob, n_dp, n_dp_range):
     create_excel_file(filename)
     for i in range(n):
-        print(f'\nТЕСТ\t#{i + 1}\n{testname} \n' + '- ' * 13)
+        print(f'\nТЕСТ {testtype}\t#{i + 1}\n{testname} \n' + '- ' * 13)
 
         key_length, pure_length, pairs_not_entangled, pairs_not_entangled_pct, quber, md5_hashed_key = QKD.main(
             num_pairs, inter_prob, int_dp, int_dp_range, n_prob, n_dp, n_dp_range)
