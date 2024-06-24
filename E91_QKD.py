@@ -175,9 +175,8 @@ def main(num_pairs, inter_prob, int_dp, int_dp_range, n_prob, n_dp, n_dp_range):
         quber = 0
         md5_hashed_key = "[insufficient length ! ]"
 
-    if __name__ == "__main__":
-        # Сохранение результатов прямого вызова скрипта в Excel
-        results_df.to_excel("E91_singlescript_result.xlsx", index=False)
+    # Сохранение результатов прямого вызова скрипта в Excel
+    results_df.to_excel("E91_singlescript_result.xlsx", index=False)
     # вывод в консоль:
     console_display(alice_key,pure_key,pairs_not_entangled,pairs_not_entangled_pct,quber, md5_hashed_key)
 
@@ -211,11 +210,13 @@ def Diploma_singletesting():
         main(n, 0.15, 1, 0.1, 0.01, 0, 0)
         a += 1
         e = int(input('- ' * 55 + '\n> > enter 1 to continue, 0 to exit . . . -->\t'))
+
         if e == 0:
             if __name__ == "__main__":
                 exit()
             else:
                 L.Diploma_launcher(a)
+
 
 if __name__ == "__main__":
     L.Header(1)
