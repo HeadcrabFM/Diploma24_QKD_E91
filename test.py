@@ -37,7 +37,6 @@ def create_combined_excel(filename,testtype):
     elif testtype=='length':
         columns = ["тест №",
                    "Количество ЭПР пар",
-                   "QUBER-ideal", "QUBER-static", "QUBER-dynamic",
                    "len(ИК)-ideal", "len(ИК)-static", "len(ИК)-dynamic",
                    "len(pure ИК)-ideal", "len(pure ИК)-static", "len(pure ИК)-dynamic",
                    "Untngld ИК bits-ideal", "Untngld ИК bits-static", "Untngld ИК bits-dynamic"]
@@ -61,7 +60,8 @@ def create_combined_excel(filename,testtype):
             ("QUBER", "QUBER-ideal", "QUBER-static", "QUBER-dynamic"),
             ("Длина итогового ключа", "len(ИК)-ideal", "len(ИК)-static", "len(ИК)-dynamic"),
             ("Длина pure ключа", "len(pure ИК)-ideal", "len(pure ИК)-static", "len(pure ИК)-dynamic"),
-            ("Пар в ИК не запутано", "Untngld ИК bits-ideal", "Untngld ИК bits-static", "Untngld ИК bits-dynamic")
+            ("Пар в ИК не запутано", "Untngld ИК bits-ideal", "Untngld ИК bits-static", "Untngld ИК bits-dynamic"),
+            ("QUBER-ideal", "QUBER-static", "QUBER-dynamic")
         ]
 
     for original_col, ideal_col, static_col, dynamic_col in metrics:
@@ -80,7 +80,7 @@ def test_E91(testtype, n, testname, filename, num_pairs, inter_prob, int_dp, int
         key_length, pure_length, pairs_not_entangled, pairs_not_entangled_pct, quber, md5_hashed_key = QKD.main(
             num_pairs, inter_prob, int_dp, int_dp_range, n_prob, n_dp, n_dp_range)
         if testtype=='length':
-            num_pairs+=5;
+            num_pairs+=10;
 
         append_to_excel(filename, i, num_pairs, key_length, pure_length, pairs_not_entangled,
                         pairs_not_entangled_pct, quber, md5_hashed_key)
@@ -89,7 +89,7 @@ def test_E91(testtype, n, testname, filename, num_pairs, inter_prob, int_dp, int
 def TestSession(testtype):
     n = int(input(f'\nВведите количество итераций для теста типа <<{testtype}>>:\t'))
 
-    if testtype=='length': num_pairs =5
+    if testtype=='length': num_pairs =0
     elif testtype=='params': num_pairs = 1000
 
     test_E91(testtype, n, 'В ИДЕАЛЬНЫХ УСЛОВИЯХ - БЕЗ ПЕРЕХВАТА, ВЕР. ШУМА = 5%',
@@ -100,7 +100,7 @@ def TestSession(testtype):
              0.1, 0, 0, 0.05, 0, 0)
     test_E91(testtype, n, 'C ДИНАМИЧЕСКОЙ ВЕРОЯТНОСТЬЮ ПЕРЕХВАТА =10(+5)% И ШУМА =5(+2.5)%',
                     f'Test_{testtype}_dynamic_results.xlsx', num_pairs, 0.1, 1, 0.05, 0.05, 1, 0.025)
-    create_combined_excel(f'Combined_Test_Results_{testtype}_{n}reps-2406.xlsx', testtype)
+    create_combined_excel(f'Combined_Test_Results_{testtype}_{n}reps.xlsx', testtype)
 
 
 if __name__ == "__main__":
