@@ -1,7 +1,11 @@
-import E91_QKD as QKD
-import launcher as L
+import QKD_E91 as QKD
+import QKD_E91_launcher as L
 import pandas as pd
-import probabilities as pb
+import QKD_E91_probabilities as pb
+import warnings
+
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 
 def create_excel_file(filename):
     columns = ["Test #", "Количество ЭПР пар", "Длина итогового ключа", "Длина pure ключа", "Пар в ИК не запутано",
@@ -75,25 +79,28 @@ def create_combined_excel(filename, testtype):
 
 def test_E91(testtype, n, testname, filename1, num_pairs, int_dp, int_dp_range, n_prob, n_dp, n_dp_range):
     models = ['Равномерное', 'Нормальное', 'Геометрическое']
-    colors=['grey','cyan','pink']
-    for i in range (len(models)):
-        filename=filename1
-        filename=models[i]+'_'+filename
+    # colors=['grey','cyan','pink']
+    for i in range(len(models)):
+        filename = filename1
+        filename = models[i] + '_' + filename
         create_excel_file(filename)
-        if __name__ == "__main__":
-            inter_prob_line = pb.Prob_distribution(num_pairs, models[i], colors[i], 'yes')
-        else:
-            inter_prob_line = pb.Prob_distribution(num_pairs, models[i], colors[i], 'no')
+        if __name__ != "__main__":
+            # генерация единого ряда вероятностей для серии:
+            inter_prob_line = pb.Prob_distribution(num_pairs, models[i], pb.get_random_color(), 'yes')
         if testtype == 'length':
-            num_pairs = 20
+            num_pairs = 250
         for j in range(n):
-            print(f'\nТЕСТ {testtype}\t#{j + 1}\n{testname} \n' + '- ' * 13)
+            print(f'\nТЕСТ {testtype}\t#{i + 1}.{j + 1}\n{testname} - {models[i]} распределение\n' + '- ' * 13)
+            if __name__ == "__main__":
+                # генерация ряда вероятностей каждую итерацию серии без вывода графика при прямом вызове скрипта:
+                inter_prob_line = pb.Prob_distribution(num_pairs, models[i], pb.get_random_color(), 'no')
+                print(f'// unique probability line generated... ChartDisplaying is off due to direct script call\n')
 
             key_length, pure_length, pairs_not_entangled, pairs_not_entangled_pct, quber, md5_hashed_key = QKD.main(
-                num_pairs, inter_prob_line, int_dp, int_dp_range, n_prob, n_dp, n_dp_range,models[i])
+                num_pairs, inter_prob_line, int_dp, int_dp_range, n_prob, n_dp, n_dp_range, models[i])
 
             if testtype == 'length':
-                num_pairs += 10;
+                num_pairs += 2;
 
             append_to_excel(filename, j, num_pairs, key_length, pure_length, pairs_not_entangled,
                             pairs_not_entangled_pct, quber, md5_hashed_key)
@@ -103,13 +110,15 @@ def TestSession(testtype):
     n = int(input(f'\nВведите количество итераций для теста типа <<{testtype}>>:\t'))
 
     if testtype == 'length':
-        num_pairs = 20
+        num_pairs = n
     elif testtype == 'params':
         num_pairs = 1000
 
-    test_E91(testtype, n, f'В ИДЕАЛЬНЫХ УСЛОВИЯХ - БЕЗ ПЕРЕХВАТА, ВЕР. ШУМА = 5%',
+    test_E91(testtype, n, f'ДИНАМИЧЕСКАЯ ВЕРОЯТНОСТЬ',
              f'Test_{testtype}_results.xlsx', num_pairs,
              0, 0, 0.05, 0, 0)
+    if __name__ == "__main__":
+        testtype.join('_direct')
     create_combined_excel(f'Combined_Test_Results_{testtype}_{n}reps.xlsx', testtype)
 
 

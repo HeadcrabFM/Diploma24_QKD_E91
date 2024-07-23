@@ -4,8 +4,8 @@ import random
 from qutip import basis, bell_state
 import hashlib
 
-import launcher as L
-import probabilities as pb
+import QKD_E91_launcher as L
+import QKD_E91_probabilities as pb
 
 
 # Функция для генерации запутанных пар: библиотека qutip
@@ -13,12 +13,14 @@ def generate_entangled_pairs(num_pairs):
     psi = bell_state('00')  # Запутанное состояние Белла
     return [{"id": i, "state": psi, "entangled": True} for i in range(num_pairs)]
 
+
 # Перехват с вероятностью
 def interception(pair, inter_prob, dynamic_prob, range_val):
     if dynamic_prob == 1:
-        prob = np.random.uniform(inter_prob - range_val/3, inter_prob + range_val)
+        prob = np.random.uniform(inter_prob - range_val / 3, inter_prob + range_val)
     else:
         prob = inter_prob
+        # print(f'вероятность:\t{prob}')
 
     if pair['entangled'] and np.random.random() < prob:
         pair['state'] = (random.randint(0, 1), 1 - random.randint(0, 1))
@@ -26,10 +28,11 @@ def interception(pair, inter_prob, dynamic_prob, range_val):
         return True
     return False
 
+
 # Шум с вероятностью
 def noise(pair, noise_prob, dynamic_prob, range_val):
     if dynamic_prob == 1:
-        prob = np.random.uniform(noise_prob - range_val/3, noise_prob+range_val)
+        prob = np.random.uniform(noise_prob - range_val / 3, noise_prob + range_val)
     else:
         prob = noise_prob
 
@@ -39,10 +42,12 @@ def noise(pair, noise_prob, dynamic_prob, range_val):
         return True
     return False
 
+
 # Случайный выбор базиса
 def random_basis():
     bases = ['linear', 'diagonal', 'circular']
     return random.choice(bases)
+
 
 # Измерение состояния в выбранном базисе
 def measure_photon(pair, basis):
@@ -51,12 +56,14 @@ def measure_photon(pair, basis):
         pair['state'] = (result, 1 - result)
     return pair['state'][0]
 
+
 # Проверка выполнения неравенства Белла
 def verify_bell_inequality(pair):
     if pair['entangled']:
         return random.uniform(2, 2 * np.sqrt(2))
     else:
         return random.uniform(0, 2)
+
 
 # Генерация секретного ключа
 def generate_secret_key(df):
@@ -65,8 +72,8 @@ def generate_secret_key(df):
     alice_key = ''.join(map(str, matched_bases_df["Alice value"].values))
     bob_key = ''.join(map(str, matched_bases_df["Bob value"].values))
     pure_key = ''.join(map(str, purest_df["Alice value"].values))
-    print('\nA_key:\t', alice_key)
-    print('B_key:\t', bob_key)
+    # print('\nA_key:\t', alice_key)
+    # print('B_key:\t', bob_key)
 
     if alice_key == ''.join('1' if x == '0' else '0' for x in bob_key):
         print("Ключи Алисы и Боба инвертны\n")
@@ -76,12 +83,14 @@ def generate_secret_key(df):
               "ОШИБКА РАБОТЫ ПРОТОКОЛА!\n")
         return alice_key, None, pure_key
 
+
 # хранение отброшенных ключей
 def generate_trash_key(df):
     matched_bases_df = df[(df["basis equality"] == 0)]
     alice_trash_key = ''.join(map(str, matched_bases_df["Alice value"].values))
     bob_trash_key = ''.join(map(str, matched_bases_df["Bob value"].values))
     return alice_trash_key, bob_trash_key
+
 
 def binary_to_MD5(binary_string):
     if len(binary_string) < 256:
@@ -93,17 +102,20 @@ def binary_to_MD5(binary_string):
     hex_result = md5_hash.hexdigest()
     return hex_result
 
+
 # Основной алгоритм
 def qkd_protocol(num_pairs, inter_prob_line, int_dp, int_dp_range, n_prob, n_dp, n_dp_range):
     pairs = generate_entangled_pairs(num_pairs)
     results_df = create_results_dataframe(num_pairs)
-    step=0
+    step = 0
     for pair in pairs:
         # Проверка индекса step
         if step >= len(inter_prob_line):
             step = len(inter_prob_line) - 1  # Устанавливаем step в последний допустимый индекс
+        # полное последовательное повторение вероятностей в каждом тесте:
         inter_prob = inter_prob_line[step]
-        #print(step, inter_prob)
+        # случайный выбор из ряда вероятностей с возможными повторениями - в тестах не используется:
+        # inter_prob = random.choice(inter_prob_line)
         interception_flag = interception(pair, inter_prob, int_dp, int_dp_range)
         noise_flag = noise(pair, n_prob, n_dp, n_dp_range)
 
@@ -121,16 +133,16 @@ def qkd_protocol(num_pairs, inter_prob_line, int_dp, int_dp_range, n_prob, n_dp,
         step += 1
 
         record_results(results_df, pair['id'], pair, inter_prob, interception_flag, noise_flag, alice_basis, bob_basis,
-                       alice_value,bob_value, s_value)
+                       alice_value, bob_value, s_value)
 
     return results_df
 
 
-def console_display(alice_key,pure_key,pairs_not_entangled,pairs_not_entangled_pct,quber, md5_hashed_key):
+def console_display(alice_key, pure_key, pairs_not_entangled, pairs_not_entangled_pct, quber, md5_hashed_key):
     if alice_key and len(alice_key) >= 256:
-        print(f"Итоговый \"чистый\" ключ:\t\t{alice_key}"
-              f"\nДлина итогового ключа:\t\t{len(alice_key)}"
-              f"\n{'-'*16}"
+        # print(f"Итоговый \"чистый\" ключ:\t\t{alice_key}")
+        print(f"Длина итогового ключа:\t\t{len(alice_key)}"
+              f"\n{'-' * 16}"
               f"\nДлина pure ключа:\t\t\t{len(pure_key)}"
               f"\nПар не запутано:\t\t\t{pairs_not_entangled}"
               f"\n{'-' * 16}\n")
@@ -159,8 +171,7 @@ def console_display(alice_key,pure_key,pairs_not_entangled,pairs_not_entangled_p
 
 
 # Основная функция
-def main(num_pairs, inter_prob_line, int_dp, int_dp_range, n_prob, n_dp, n_dp_range,model):
-
+def main(num_pairs, inter_prob_line, int_dp, int_dp_range, n_prob, n_dp, n_dp_range, model):
     results_df = qkd_protocol(num_pairs, inter_prob_line, int_dp, int_dp_range, n_prob, n_dp, n_dp_range)
 
     matching_ids = results_df[results_df["basis equality"] == 1]["ID"].values
@@ -189,18 +200,22 @@ def main(num_pairs, inter_prob_line, int_dp, int_dp_range, n_prob, n_dp, n_dp_ra
     results_df.to_excel(f"E91_singlescript_result_{model}.xlsx", index=False)
 
     # вывод в консоль:
-    console_display(alice_key,pure_key,pairs_not_entangled,pairs_not_entangled_pct,quber, md5_hashed_key)
+    console_display(alice_key, pure_key, pairs_not_entangled, pairs_not_entangled_pct, quber, md5_hashed_key)
 
     return key_length, pure_length, pairs_not_entangled, pairs_not_entangled_pct, quber, md5_hashed_key
 
+
 # Функция для создания DataFrame
 def create_results_dataframe(num_pairs):
-    columns = ["ID", "inter_prob","interception", "noise", "Entangled status", "Alice basis", "Bob basis", "basis equality",
+    columns = ["ID", "inter_prob", "interception", "noise", "Entangled status", "Alice basis", "Bob basis",
+               "basis equality",
                "Alice value", "Bob value", "Anticorrelation", "Bell result"]
     return pd.DataFrame(index=range(num_pairs), columns=columns)
 
+
 # Запись результатов в DataFrame
-def record_results(df, idx, pair, inter_prob, interception_flag, noise_flag, alice_basis, bob_basis, alice_value, bob_value, s_value):
+def record_results(df, idx, pair, inter_prob, interception_flag, noise_flag, alice_basis, bob_basis, alice_value,
+                   bob_value, s_value):
     df.at[idx, "ID"] = pair['id']
     df.at[idx, "inter_prob"] = inter_prob
     df.at[idx, "interception"] = int(interception_flag)
@@ -214,21 +229,21 @@ def record_results(df, idx, pair, inter_prob, interception_flag, noise_flag, ali
     df.at[idx, "Anticorrelation"] = int(alice_value != bob_value)
     df.at[idx, "Bell result"] = s_value
 
-def Diploma_singletesting(model_name):
+
+def Diploma_singletesting():
     a = 1
+    models = ['Равномерное', 'Нормальное', 'Геометрическое', 'test']
     while (1):
-        print(f'\n>> DEBUG: dynamic interception 10%, static noise 1%\nТЕСТ {a}\n' + '- ' * 13)
+        print(f'\n>> DEBUG\nSINGLE TEST :: {a}\nNoise: 5% - dynamic +-3\n' + '- ' * 13)
         n = int(input('Введите количество запутанных пар для передачи:\t'))
-        models=['Равномерное','Нормальное','Геометрическое','test']
-        if model_name=='test':
-            model_name=models[int(input('Выберите вероятность:\n1:\tравномерное распределение'
-                                 '\n2:\tнормальное распределение'
-                                 '\n3:\tГеометрическое распределение\n'))-1]
-        if __name__ == "__main__":
-            inter_prob_line=pb.Prob_distribution(n,model_name,'cyan','yes')
-        else:
-            inter_prob_line = pb.Prob_distribution(n, model_name, 'cyan', 'no')
-        main(n, inter_prob_line, 1, 0.1, 0.01, 0, 0,model_name)
+        k = int(input('Выберите распределение вероятностей:\n1:\tравномерное распределение'
+                      '\n2:\tнормальное распределение'
+                      '\n3:\tГеометрическое распределение\n')) - 1
+        color = pb.get_random_color()
+        inter_prob_line = pb.Prob_distribution(n, models[k], color, 'yes')
+
+        main(n, inter_prob_line, 0, 0, 0.05, 1, 0.03, models[k])
+
         a += 1
         e = int(input('- ' * 55 + '\n> > enter 1 to continue, 0 to exit . . . -->\t'))
 
@@ -242,4 +257,4 @@ def Diploma_singletesting(model_name):
 if __name__ == "__main__":
     L.Header(1)
     print("E91 single test in progress...")
-    Diploma_singletesting('test')
+    Diploma_singletesting()
